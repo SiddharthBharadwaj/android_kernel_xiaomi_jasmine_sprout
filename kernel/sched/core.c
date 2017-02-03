@@ -3393,6 +3393,10 @@ static void __sched notrace __schedule(bool preempt)
 
 	if (likely(prev != next)) {
 
+#ifdef CONFIG_SCHED_WALT
+		if (!prev->on_rq)
+			prev->last_sleep_ts = wallclock;
+#endif
 		rq->nr_switches++;
 		rq->curr = next;
 		++*switch_count;
