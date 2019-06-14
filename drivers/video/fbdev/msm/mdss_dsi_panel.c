@@ -42,8 +42,9 @@ EXPORT_SYMBOL(g_lcd_id);
 extern bool enable_gesture_mode;
 #endif
 
-bool ESD_TE_status = false;
-DEFINE_LED_TRIGGER(bl_led_trigger);
+static bool ce_enable = true;
+static bool srgb_enable = true;
+static bool cabc_enable = false;
 
 static unsigned int bl_level_soft_limit = 16;
 module_param(bl_level_soft_limit, uint, 0644);
