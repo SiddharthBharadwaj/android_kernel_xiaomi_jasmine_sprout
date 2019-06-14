@@ -41,8 +41,9 @@ EXPORT_SYMBOL(g_lcd_id);
 extern bool enable_gesture_mode;
 #endif
 
-bool ESD_TE_status = false;
-DEFINE_LED_TRIGGER(bl_led_trigger);
+static bool ce_enable = true;
+static bool srgb_enable = true;
+static bool cabc_enable = false;
 
 void mdss_dsi_panel_pwm_cfg(struct mdss_dsi_ctrl_pdata *ctrl)
 {
