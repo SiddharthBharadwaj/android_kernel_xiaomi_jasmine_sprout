@@ -526,7 +526,7 @@ EXPORT_SYMBOL(kgsl_pwrctrl_set_constraint);
  * CPUs (which are selected through dtsi) on which GPU
  * thread is running. This would help for performance.
  */
-void kgsl_pwrctrl_update_l2pc(struct kgsl_device *device)
+/*void kgsl_pwrctrl_update_l2pc(struct kgsl_device *device)
 {
 	int cpu;
 
@@ -543,7 +543,7 @@ void kgsl_pwrctrl_update_l2pc(struct kgsl_device *device)
 				KGSL_L2PC_CPU_TIMEOUT);
 	}
 }
-EXPORT_SYMBOL(kgsl_pwrctrl_update_l2pc);
+EXPORT_SYMBOL(kgsl_pwrctrl_update_l2pc);*/
 
 static ssize_t kgsl_pwrctrl_thermal_pwrlevel_store(struct device *dev,
 					 struct device_attribute *attr,
