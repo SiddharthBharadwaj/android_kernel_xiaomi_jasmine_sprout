@@ -141,13 +141,14 @@ struct bio {
 #define BIO_QUIET	6	/* Make BIO Quiet */
 #define BIO_CHAIN	7	/* chained bio, ->bi_remaining in effect */
 #define BIO_REFFED	8	/* bio has elevated ->bi_cnt */
+#define BIO_THROTTLED	9	/* This bio has already been subjected to
+				 * throttling rules. Don't do it again. */
 
 /*
  * Flags starting here get preserved by bio_reset() - this includes
- * BIO_POOL_IDX()
+ * BVEC_POOL_IDX()
  */
 #define BIO_RESET_BITS	13
-#define BIO_OWNS_VEC	13	/* bio_free() should free bvec */
 /*
  * Added for Req based dm which need to perform post processing. This flag
  * ensures blk_update_request does not free the bios or request, this is done
@@ -157,13 +158,20 @@ struct bio {
 #define BIO_INLINECRYPT 15
 
 /*
- * top 4 bits of bio flags indicate the pool this bio came from
+ * We support 6 different bvec pools, the last one is magic in that it
+ * is backed by a mempool.
  */
-#define BIO_POOL_BITS		(4)
-#define BIO_POOL_NONE		((1UL << BIO_POOL_BITS) - 1)
-#define BIO_POOL_OFFSET		(32 - BIO_POOL_BITS)
-#define BIO_POOL_MASK		(1UL << BIO_POOL_OFFSET)
-#define BIO_POOL_IDX(bio)	((bio)->bi_flags >> BIO_POOL_OFFSET)
+#define BVEC_POOL_NR		6
+#define BVEC_POOL_MAX		(BVEC_POOL_NR - 1)
+
+/*
+ * Top 4 bits of bio flags indicate the pool the bvecs came from.  We add
+ * 1 to the actual index so that 0 indicates that there are no bvecs to be
+ * freed.
+ */
+#define BVEC_POOL_BITS		(4)
+#define BVEC_POOL_OFFSET	(32 - BVEC_POOL_BITS)
+#define BVEC_POOL_IDX(bio)	((bio)->bi_flags >> BVEC_POOL_OFFSET)
 
 #endif /* CONFIG_BLOCK */
 
@@ -189,13 +197,10 @@ enum rq_flag_bits {
 	__REQ_INTEGRITY,	/* I/O includes block integrity payload */
 	__REQ_FUA,		/* forced unit access */
 	__REQ_FLUSH,		/* request for cache flush */
-	__REQ_POST_FLUSH_BARRIER,/* cache barrier after a data req */
 	__REQ_BARRIER,		/* marks flush req as barrier */
 
 	/* bio only flags */
 	__REQ_RAHEAD,		/* read ahead, can fail anytime */
-	__REQ_THROTTLED,	/* This bio has already been subjected to
-				 * throttling rules. Don't do it again. */
 
 	/* request only flags */
 	__REQ_SORTED = __REQ_RAHEAD, /* elevator knows about this request */
@@ -218,7 +223,6 @@ enum rq_flag_bits {
 	__REQ_PM,		/* runtime pm request */
 	__REQ_HASHED,		/* on IO scheduler merge hash */
 	__REQ_MQ_INFLIGHT,	/* track inflight for MQ */
-	__REQ_NO_TIMEOUT,	/* requests may never expire */
 	__REQ_URGENT,		/* urgent request */
 	__REQ_NR_BITS,		/* stops here */
 };
@@ -251,8 +255,6 @@ enum rq_flag_bits {
 	(REQ_NOMERGE | REQ_STARTED | REQ_SOFTBARRIER | REQ_FLUSH | REQ_FUA | REQ_FLUSH_SEQ)
 
 #define REQ_RAHEAD		(1ULL << __REQ_RAHEAD)
-#define REQ_THROTTLED		(1ULL << __REQ_THROTTLED)
-
 #define REQ_SORTED		(1ULL << __REQ_SORTED)
 #define REQ_SOFTBARRIER		(1ULL << __REQ_SOFTBARRIER)
 #define REQ_FUA			(1ULL << __REQ_FUA)
@@ -268,7 +270,6 @@ enum rq_flag_bits {
 #define REQ_ALLOCED		(1ULL << __REQ_ALLOCED)
 #define REQ_COPY_USER		(1ULL << __REQ_COPY_USER)
 #define REQ_FLUSH		(1ULL << __REQ_FLUSH)
-#define REQ_POST_FLUSH_BARRIER	(1ULL << __REQ_POST_FLUSH_BARRIER)
 #define REQ_FLUSH_SEQ		(1ULL << __REQ_FLUSH_SEQ)
 #define REQ_IO_STAT		(1ULL << __REQ_IO_STAT)
 #define REQ_MIXED_MERGE		(1ULL << __REQ_MIXED_MERGE)
@@ -276,7 +277,6 @@ enum rq_flag_bits {
 #define REQ_PM			(1ULL << __REQ_PM)
 #define REQ_HASHED		(1ULL << __REQ_HASHED)
 #define REQ_MQ_INFLIGHT		(1ULL << __REQ_MQ_INFLIGHT)
-#define REQ_NO_TIMEOUT		(1ULL << __REQ_NO_TIMEOUT)
 
 typedef unsigned int blk_qc_t;
 #define BLK_QC_T_NONE	-1U

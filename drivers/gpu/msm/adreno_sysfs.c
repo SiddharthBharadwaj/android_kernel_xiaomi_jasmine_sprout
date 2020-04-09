@@ -169,6 +169,9 @@ static int _preemption_store(struct adreno_device *adreno_dev,
 		unsigned int val)
 {
 	struct kgsl_device *device = KGSL_DEVICE(adreno_dev);
+	struct kgsl_context *context;
+	struct adreno_context *drawctxt;
+	int id;
 
 	if (test_bit(ADRENO_DEVICE_PREEMPTION, &adreno_dev->priv) == val)
 			return 0;
@@ -178,6 +181,15 @@ static int _preemption_store(struct adreno_device *adreno_dev,
 	kgsl_pwrctrl_change_state(device, KGSL_STATE_SUSPEND);
 	change_bit(ADRENO_DEVICE_PREEMPTION, &adreno_dev->priv);
 	adreno_dev->cur_rb = &(adreno_dev->ringbuffers[0]);
+
+	/* Update the ringbuffer for each draw context */
+	write_lock(&device->context_lock);
+	idr_for_each_entry(&device->context_idr, context, id) {
+		drawctxt = ADRENO_CONTEXT(context);
+		drawctxt->rb = adreno_ctx_get_rb(adreno_dev, drawctxt);
+	}
+	write_unlock(&device->context_lock);
+
 	kgsl_pwrctrl_change_state(device, KGSL_STATE_SLUMBER);
 
 	mutex_unlock(&device->mutex);
@@ -320,7 +332,6 @@ static ADRENO_SYSFS_BOOL(ft_long_ib_detect);
 static ADRENO_SYSFS_BOOL(ft_hang_intr_status);
 
 static DEVICE_INT_ATTR(wake_nice, 0644, adreno_wake_nice);
-static DEVICE_INT_ATTR(wake_timeout, 0644, adreno_wake_timeout);
 
 static ADRENO_SYSFS_BOOL(sptp_pc);
 static ADRENO_SYSFS_BOOL(lm);
@@ -337,7 +348,6 @@ static const struct device_attribute *_attr_list[] = {
 	&adreno_attr_ft_long_ib_detect.attr,
 	&adreno_attr_ft_hang_intr_status.attr,
 	&dev_attr_wake_nice.attr,
-	&dev_attr_wake_timeout.attr,
 	&adreno_attr_sptp_pc.attr,
 	&adreno_attr_lm.attr,
 	&adreno_attr_preemption.attr,

@@ -18,6 +18,9 @@ obj-$(CONFIG_CPU_FREQ_GOV_COMMON)		+= cpufreq_governor.o
 obj-$(CONFIG_CPU_BOOST)			+= cpu-boost.o
 obj-$(CONFIG_DSBOOST)			+= dsboost.o
 
+# CPU General Boost
+obj-$(CONFIG_CPU_GENERAL_BOOST)		+= cpu_general_boost.o
+
 obj-$(CONFIG_CPUFREQ_DT)		+= cpufreq-dt.o
 
 ##################################################################################

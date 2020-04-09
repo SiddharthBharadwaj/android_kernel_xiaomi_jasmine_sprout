@@ -526,7 +526,7 @@ EXPORT_SYMBOL(kgsl_pwrctrl_set_constraint);
  * CPUs (which are selected through dtsi) on which GPU
  * thread is running. This would help for performance.
  */
-void kgsl_pwrctrl_update_l2pc(struct kgsl_device *device)
+/*void kgsl_pwrctrl_update_l2pc(struct kgsl_device *device)
 {
 	int cpu;
 
@@ -543,7 +543,7 @@ void kgsl_pwrctrl_update_l2pc(struct kgsl_device *device)
 				KGSL_L2PC_CPU_TIMEOUT);
 	}
 }
-EXPORT_SYMBOL(kgsl_pwrctrl_update_l2pc);
+EXPORT_SYMBOL(kgsl_pwrctrl_update_l2pc);*/
 
 static ssize_t kgsl_pwrctrl_thermal_pwrlevel_store(struct device *dev,
 					 struct device_attribute *attr,
@@ -2412,8 +2412,9 @@ void kgsl_idle_check(struct work_struct *work)
 
 	requested_state = device->requested_state;
 
-	if (device->state == KGSL_STATE_ACTIVE
-		   || device->state ==  KGSL_STATE_NAP) {
+	if ((requested_state != KGSL_STATE_NONE) &&
+		(device->state == KGSL_STATE_ACTIVE
+			|| device->state ==  KGSL_STATE_NAP)) {
 
 		if (!atomic_read(&device->active_cnt)) {
 			spin_lock(&device->submit_lock);
@@ -2748,7 +2749,6 @@ _slumber(struct kgsl_device *device)
 		kgsl_pwrctrl_clk_set_options(device, false);
 		kgsl_pwrctrl_disable(device);
 		kgsl_pwrscale_sleep(device);
-		kgsl_pwrctrl_irq(device, KGSL_PWRFLAGS_OFF);
 		kgsl_pwrctrl_set_state(device, KGSL_STATE_SLUMBER);
 		pm_qos_update_request(&device->pwrctrl.pm_qos_req_dma,
 						PM_QOS_DEFAULT_VALUE);
