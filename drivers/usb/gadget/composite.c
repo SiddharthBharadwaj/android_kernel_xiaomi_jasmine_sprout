@@ -891,6 +891,7 @@ static int set_config(struct usb_composite_dev *cdev,
 
 done:
 	usb_gadget_vbus_draw(gadget, USB_VBUS_DRAW(gadget->speed));
+
 	if (result >= 0 && cdev->delayed_status)
 		result = USB_GADGET_DELAYED_STATUS;
 	return result;
@@ -2356,6 +2357,7 @@ void composite_suspend(struct usb_gadget *gadget)
 	cdev->suspended = 1;
 	spin_unlock_irqrestore(&cdev->lock, flags);
 
+	usb_gadget_set_selfpowered(gadget);
 	usb_gadget_vbus_draw(gadget, 2);
 }
 
@@ -2396,6 +2398,7 @@ void composite_resume(struct usb_gadget *gadget)
 		}
 
 		usb_gadget_vbus_draw(gadget, USB_VBUS_DRAW(gadget->speed));
+
 	}
 
 	spin_unlock_irqrestore(&cdev->lock, flags);

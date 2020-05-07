@@ -1920,8 +1920,10 @@ static int ufshcd_hibern8_hold(struct ufs_hba *hba, bool async)
 	}
 
 start:
+
 	switch (hba->hibern8_on_idle.state) {
 	case HIBERN8_EXITED:
+
 		break;
 	case REQ_HIBERN8_ENTER:
 		if (cancel_delayed_work(&hba->hibern8_on_idle.enter_work)) {
