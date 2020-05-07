@@ -192,8 +192,10 @@ static bool hdmi_edid_is_mode_supported(struct hdmi_edid_ctrl *edid_ctrl,
 	return true;
 }
 
-static int hdmi_edid_reset_parser(struct hdmi_edid_ctrl *edid_ctrl)
+int hdmi_edid_reset_parser(void *input)
 {
+	struct hdmi_edid_ctrl *edid_ctrl = (struct hdmi_edid_ctrl *)input;
+
 	if (!edid_ctrl) {
 		DEV_ERR("%s: invalid input\n", __func__);
 		return -EINVAL;
@@ -2445,7 +2447,7 @@ int hdmi_edid_parser(void *input)
 	}
 
 	/* reset edid data for new hdmi connection */
-	hdmi_edid_reset_parser(edid_ctrl);
+	hdmi_edid_reset_parser(input);
 
 	edid_buf = edid_ctrl->edid_buf;
 

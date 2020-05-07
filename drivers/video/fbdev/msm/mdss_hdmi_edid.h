@@ -69,6 +69,7 @@ struct hdmi_edid_override_data {
 };
 
 int hdmi_edid_parser(void *edid_ctrl);
+int hdmi_edid_reset_parser(void *edid_ctrl);
 u32 hdmi_edid_get_raw_data(void *edid_ctrl, u8 *buf, u32 size);
 u8 hdmi_edid_get_sink_scaninfo(void *edid_ctrl, u32 resolution);
 bool hdmi_edid_is_dvi_mode(void *input);
