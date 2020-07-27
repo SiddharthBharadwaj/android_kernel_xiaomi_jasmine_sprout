@@ -4846,7 +4846,7 @@ int get_prop_batt_temp(struct smb_charger *chg)
 	union power_supply_propval temp_val = {0, };
 	int rc;
 
-	rc = smblib_get_prop_batt_temp(chg, &temp_val);
+	rc = smblib_get_prop_from_bms(chg, POWER_SUPPLY_PROP_TEMP, &temp_val);
 
 	return temp_val.intval;
 }
@@ -4866,7 +4866,8 @@ int get_prop_batt_volt(struct smb_charger *chg)
 	union power_supply_propval volt_val = {0, };
 	int rc;
 
-	rc = smblib_get_prop_batt_voltage_now(chg, &volt_val);
+	rc = smblib_get_prop_from_bms(chg, POWER_SUPPLY_PROP_CURRENT_NOW,
+									&volt_val);
 
 	return volt_val.intval;
 }
