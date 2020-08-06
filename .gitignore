@@ -116,16 +116,8 @@ all.config
 
 # fetched Android config fragments
 android/configs/android-*.cfg
+
 #
 #Ignoring Android.bp link file
 #
 Android.bp
-
-# Clang's compilation database file
-/compile_commands.json
-out/
-*.sh
-clang-llvm/
-AnyKernel2/
-error.log
-gcc*/
